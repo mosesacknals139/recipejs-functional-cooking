@@ -42,6 +42,28 @@ header p {
     align-items: center;
 }
 
+/* Search Bar (Part 4) */
+.search-bar {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+}
+
+#search-input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 50px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
 .filter-group,
 .sort-group {
     display: flex;
@@ -79,6 +101,13 @@ button.active {
     border: 1px solid #ddd;
 }
 
+/* Recipe Counter (Part 4) */
+#recipe-count {
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 /* Main Container */
 main {
     max-width: 1200px;
@@ -93,7 +122,6 @@ main {
     gap: 1.5rem;
     justify-content: center;
     align-items: flex-start;
-    /* Important for variable height cards */
 }
 
 /* Recipe Card Styles */
@@ -103,12 +131,12 @@ main {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     width: 320px;
-    /* Slightly wider for content */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: fadeIn 0.5s ease-out;
     display: flex;
-    /* Flex layout for sticky footer buttons if needed */
     flex-direction: column;
+    position: relative;
+    /* For Favorites Icon */
 }
 
 @keyframes fadeIn {
@@ -128,10 +156,39 @@ main {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
+/* Favorite Button (Part 4) */
+.fav-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #cbd5e0;
+    /* Inactive color */
+    padding: 0;
+    box-shadow: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.fav-btn:hover {
+    transform: scale(1.1);
+    box-shadow: none;
+    color: #fc8181;
+}
+
+.fav-btn.active {
+    color: #e53e3e;
+    /* Active Heart Color */
+}
+
 .recipe-card h3 {
     color: #4a5568;
     font-size: 1.4rem;
     margin-bottom: 0.8rem;
+    padding-right: 2rem;
+    /* Space for heart icon */
 }
 
 .recipe-meta {
@@ -171,12 +228,11 @@ main {
     color: #721c24;
 }
 
-/* Part 3 Enhancements: Toggle Buttons & Details */
+/* Toggle Buttons */
 .card-actions {
     display: flex;
     gap: 0.5rem;
     margin-top: auto;
-    /* Push to bottom */
     flex-wrap: wrap;
 }
 
@@ -236,7 +292,6 @@ main {
     margin-bottom: 0.4rem;
 }
 
-/* Nested lists style */
 .recipe-details ol ol {
     margin-top: 0.4rem;
     border-left: 2px solid #e2e8f0;

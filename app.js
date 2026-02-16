@@ -1,7 +1,6 @@
 (function () {
     /**
      * Recipe data array containing 8 recipe objects
-     * Enhanced with ingredients and steps (including nested steps)
      */
     const recipes = [
         {
@@ -215,15 +214,32 @@
     // State Management
     let currentFilter = 'all';
     let currentSort = 'name';
+    let searchQuery = '';
+    // Load favorites from local storage or initialize empty array
+    let favorites = JSON.parse(localStorage.getItem('recipeFavorites')) || [];
 
     // DOM Selection
     const recipeContainer = document.querySelector('#recipe-container');
     const filterButtons = document.querySelectorAll('.filter-btn');
     const sortButtons = document.querySelectorAll('.sort-btn');
+    const searchInput = document.querySelector('#search-input');
+    const recipeCountDisplay = document.querySelector('#recipe-count');
 
     /**
-     * Recursive function to render cooking steps
-     * Handles nested steps (objects with name and substeps)
+     * Utility: Debounce function to limit rate of execution
+     */
+    const debounce = (func, delay) => {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(null, args);
+            }, delay);
+        };
+    };
+
+    /**
+     * Recursively renders cooking steps
      */
     const renderSteps = (steps) => {
         let html = '<ol>';
@@ -256,11 +272,18 @@
 
     /**
      * Creates an HTML string for a single recipe card
-     * Updated to include toggle buttons and hidden details sections
+     * Updated with Heart Icon for Favorites
      */
     const createRecipeCard = (recipe) => {
+        const isFavorite = favorites.includes(recipe.id);
+        const heartIcon = isFavorite ? '❤️' : '🤍';
+        const activeClass = isFavorite ? 'active' : '';
+
         return `
             <div class="recipe-card" data-id="${recipe.id}">
+                <button class="fav-btn ${activeClass}" aria-label="Toggle Favorite">
+                    ${heartIcon}
+                </button>
                 <h3>${recipe.title}</h3>
                 <div class="recipe-meta">
                     <span>⏱️ ${recipe.time} min</span>
@@ -287,35 +310,72 @@
     };
 
     /**
-     * Filter recipes based on criteria
+     * Filter Logic Pipeline
      */
-    const filterRecipes = (recipes, filter) => {
-        if (filter === 'all') return [...recipes];
-        if (filter === 'quick') return recipes.filter(r => r.time < 30);
-        return recipes.filter(r => r.difficulty === filter);
+    const applyFilters = () => {
+        let filtered = [...recipes];
+
+        // 1. Filter by Category / Difficulty / Favorites
+        if (currentFilter === 'quick') {
+            filtered = filtered.filter(r => r.time < 30);
+        } else if (currentFilter === 'favorites') {
+            filtered = filtered.filter(r => favorites.includes(r.id));
+        } else if (currentFilter !== 'all') {
+            filtered = filtered.filter(r => r.difficulty === currentFilter);
+        }
+
+        // 2. Filter by Search Query
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            filtered = filtered.filter(r =>
+                r.title.toLowerCase().includes(lowerQuery) ||
+                r.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
+            );
+        }
+
+        return filtered;
     };
 
     /**
-     * Sort recipes based on criteria
+     * Sort Login Pipeline
      */
-    const sortRecipes = (recipes, sortBy) => {
-        const sorted = [...recipes];
-        if (sortBy === 'name') {
+    const applySort = (recipesToSort) => {
+        const sorted = [...recipesToSort];
+        if (currentSort === 'name') {
             sorted.sort((a, b) => a.title.localeCompare(b.title));
-        } else if (sortBy === 'time') {
+        } else if (currentSort === 'time') {
             sorted.sort((a, b) => a.time - b.time);
         }
         return sorted;
     };
 
     /**
-     * Central update display function
+     * Update Display Function
      */
     const updateDisplay = () => {
-        const filtered = filterRecipes(recipes, currentFilter);
-        const finalRecipes = sortRecipes(filtered, currentSort);
+        const filteredRecipes = applyFilters();
+        const finalRecipes = applySort(filteredRecipes);
+
+        // Update Counter
+        recipeCountDisplay.textContent = `Showing ${finalRecipes.length} of ${recipes.length} recipes`;
+
+        // Render Cards
         const recipesHTML = finalRecipes.map(createRecipeCard).join('');
         recipeContainer.innerHTML = recipesHTML;
+    };
+
+    /**
+     * Toggle Favorite Status
+     */
+    const toggleFavorite = (id) => {
+        if (favorites.includes(id)) {
+            favorites = favorites.filter(favId => favId !== id);
+        } else {
+            favorites.push(id);
+        }
+        // Persist to Local Storage
+        localStorage.setItem('recipeFavorites', JSON.stringify(favorites));
+        updateDisplay();
     };
 
     // Event Listeners for Filters
@@ -338,12 +398,28 @@
         });
     });
 
-    // Event Delegation for Expand/Collapse
+    // Event Listener for Search (Debounced)
+    searchInput.addEventListener('input', debounce((e) => {
+        searchQuery = e.target.value.trim();
+        updateDisplay();
+    }, 300));
+
+    // Event Delegation: Toggle Details & Favorites
     recipeContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.recipe-card');
+        if (!card) return;
+
+        // Handle Favorite Button Click
+        if (e.target.closest('.fav-btn')) {
+            const id = parseInt(card.getAttribute('data-id'));
+            toggleFavorite(id);
+            return;
+        }
+
+        // Handle Details Toggle
         if (e.target.classList.contains('toggle-btn')) {
             const btn = e.target;
             const action = btn.getAttribute('data-action');
-            const card = btn.closest('.recipe-card');
 
             if (action === 'ingredients') {
                 const section = card.querySelector('.ingredients-section');
