@@ -31,7 +31,7 @@ header p {
     opacity: 0.9;
 }
 
-/* Controls Section (New for Part 2) */
+/* Controls Section */
 .controls {
     max-width: 1200px;
     margin: 2rem auto 1rem;
@@ -92,6 +92,8 @@ main {
     flex-wrap: wrap;
     gap: 1.5rem;
     justify-content: center;
+    align-items: flex-start;
+    /* Important for variable height cards */
 }
 
 /* Recipe Card Styles */
@@ -100,10 +102,13 @@ main {
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
-    width: 300px;
+    width: 320px;
+    /* Slightly wider for content */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: fadeIn 0.5s ease-out;
-    /* Add animation for filtering */
+    display: flex;
+    /* Flex layout for sticky footer buttons if needed */
+    flex-direction: column;
 }
 
 @keyframes fadeIn {
@@ -140,6 +145,7 @@ main {
 .recipe-card p {
     color: #4a5568;
     line-height: 1.5;
+    margin-bottom: 1rem;
 }
 
 /* Difficulty Badges */
@@ -163,4 +169,76 @@ main {
 .difficulty.hard {
     background-color: #f8d7da;
     color: #721c24;
+}
+
+/* Part 3 Enhancements: Toggle Buttons & Details */
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    /* Push to bottom */
+    flex-wrap: wrap;
+}
+
+.toggle-btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #667eea;
+    color: #667eea;
+    background: transparent;
+    flex: 1;
+}
+
+.toggle-btn:hover {
+    background-color: #667eea;
+    color: white;
+    box-shadow: none;
+    transform: none;
+}
+
+.recipe-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    animation: slideDown 0.3s ease-out;
+}
+
+.recipe-details.hidden {
+    display: none;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recipe-details h4 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.recipe-details ul,
+.recipe-details ol {
+    padding-left: 1.2rem;
+    font-size: 0.95rem;
+    color: #4a5568;
+}
+
+.recipe-details li {
+    margin-bottom: 0.4rem;
+}
+
+/* Nested lists style */
+.recipe-details ol ol {
+    margin-top: 0.4rem;
+    border-left: 2px solid #e2e8f0;
+    padding-left: 1rem;
 }
